@@ -1,86 +1,89 @@
 package net.lidl.lmp.springplayground.repository.repository;
 
 import net.lidl.lmp.springplayground.model.Customer;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 public class CustomerRepositoryTest {
 
-  @Autowired
-  private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
-  @Test
-  public void createAndPersistCustomer() {
-    Long id = null;
-    String firstName = "John";
-    String lastName = "Doe";
+    @Before
+    public void setUp() throws Exception {
+        customerRepository.deleteAll();
+    }
 
-    Customer customer = Customer.builder().id(id).firstName(firstName).lastName(lastName).build();
+    @Test
+    public void createAndPersistCustomer() {
+        Long id = null;
+        String firstName = "John";
+        String lastName = "Doe";
 
-    Customer persistedCustomer = customerRepository.save(customer);
+        Customer customer = Customer.builder().id(id).firstName(firstName).lastName(lastName).build();
 
-    assertThat(persistedCustomer.getId()).isGreaterThan(0L);
-  }
+        Customer persistedCustomer = customerRepository.save(customer);
 
-  @Test
-  public void findAllCustomers() {
-    customerRepository.saveAll(
-            Arrays.asList(
-                    Customer.builder().id(1L).firstName("John").lastName("Doe").build(),
-                    Customer.builder().id(2L).firstName("Jane").lastName("Doe").build(),
-                    Customer.builder().id(3L).firstName("Peter").lastName("Pan").build()
-            ));
+        assertThat(persistedCustomer.getId()).isGreaterThan(0L);
+    }
 
-    List<Customer> customers = customerRepository.findAll();
-    assertThat(customers.size()).isEqualTo(3);
-  }
+    @Test
+    public void findAllCustomers() {
+        customerRepository.saveAll(
+                Arrays.asList(
+                        Customer.builder().firstName("John").lastName("Doe").build(),
+                        Customer.builder().firstName("Jane").lastName("Doe").build(),
+                        Customer.builder().firstName("Peter").lastName("Pan").build()
+                ));
 
-  @Test
-  public void findCustomerByFirstNameAndLastName() {
-    customerRepository.saveAll(
-            Arrays.asList(
-                    Customer.builder().id(1L).firstName("John").lastName("Doe").build(),
-                    Customer.builder().id(2L).firstName("Jane").lastName("Doe").build(),
-                    Customer.builder().id(3L).firstName("Peter").lastName("Pan").build()
-            ));
-    String firstName = "Jane";
-    String lastName = "Doe";
+        List<Customer> customers = customerRepository.findAll();
+        assertThat(customers.size()).isEqualTo(3);
+    }
 
-    List<Customer> customers = customerRepository.findByFirstNameAndLastName(firstName, lastName);
+    @Test
+    public void findCustomerByFirstNameAndLastName() {
+        customerRepository.saveAll(
+                Arrays.asList(
+                        Customer.builder().firstName("John").lastName("Doe").build(),
+                        Customer.builder().firstName("Jane").lastName("Doe").build(),
+                        Customer.builder().firstName("Peter").lastName("Pan").build()
+                ));
+        String firstName = "Jane";
+        String lastName = "Doe";
 
-    assertThat(customers.size()).isEqualTo(1);
-    assertThat(customers.get(0).getFirstName()).isEqualTo(firstName);
-    assertThat(customers.get(0).getLastName()).isEqualTo(lastName);
-  }
+        List<Customer> customers = customerRepository.findByFirstNameAndLastName(firstName, lastName);
 
-  @Test
-  public void deleteCustomer() {
-    customerRepository.saveAll(
-            Arrays.asList(
-                    Customer.builder().id(1L).firstName("John").lastName("Doe").build(),
-                    Customer.builder().id(2L).firstName("Jane").lastName("Doe").build(),
-                    Customer.builder().id(3L).firstName("Peter").lastName("Pan").build()
-            ));
+        assertThat(customers.size()).isEqualTo(1);
+        assertThat(customers.get(0).getFirstName()).isEqualTo(firstName);
+        assertThat(customers.get(0).getLastName()).isEqualTo(lastName);
+    }
 
-    Customer customer = Customer.builder().id(2L).firstName("Jane").lastName("Doe").build();
+    @Test
+    public void deleteCustomer() {
+        customerRepository.saveAll(
+                Arrays.asList(
+                        Customer.builder().firstName("John").lastName("Doe").build(),
+                        Customer.builder().firstName("Jane").lastName("Doe").build(),
+                        Customer.builder().firstName("Peter").lastName("Pan").build()
+                ));
 
-    customerRepository.delete(customer);
+        Customer customer = customerRepository.findByFirstNameAndLastName("Jane", "Doe").get(0);
 
-    int nCustomers = customerRepository.findAll().size();
+        customerRepository.delete(customer);
 
-    assertThat(nCustomers).isEqualTo(2);
-  }
+        int nCustomers = customerRepository.findAll().size();
+
+        assertThat(nCustomers).isEqualTo(2);
+    }
 }
